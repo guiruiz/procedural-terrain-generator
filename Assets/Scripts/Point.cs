@@ -10,4 +10,9 @@ public struct Point
     }
 
     // @todo static Point.of(x,y) ?
+
+    public override string ToString()
+    {
+        return $"Point({x}, {y})";
+    }
 }

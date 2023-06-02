@@ -18,7 +18,7 @@ public class TerrainMatrix
 
         if (!IsInRange(startPoint))
         {
-            Debug.Log($"Invalid start coord: {startX}, {startY}");
+            Debug.Log($"Invalid start coord: {startPoint}");
             return;
         }
 
@@ -28,8 +28,6 @@ public class TerrainMatrix
 
         GenerateTerrains(startPoint);
     }
-
-
 
     public Terrain GetTerrain(Point point)
     {
