@@ -115,14 +115,14 @@ public class TerrainMatrix
     {
         if (adjacents.Length == 0)
         {
-            Debug.Log($"WARN adj terrain not found;");
+            Debug.LogWarning($"Adjacents terrain not found, picking a random type.");
             return GetRandomTerrainType();
         }
 
-        // get all eligible terrains types for each adj
+        // get eligible terrain types for all adjacents
         TerrainType[][] allEligibleTypes = Array.ConvertAll(adjacents, adj => Terrain.GetEligibleTypes(adj.type));
 
-        // find eligible terrain types intersection
+        // find eligible terrain types from the intersection
         TerrainType[] eligibleTypes = allEligibleTypes
         .Skip(1) // Skip the first array
         .Aggregate(
@@ -130,13 +130,9 @@ public class TerrainMatrix
             (result, arr) => { result.IntersectWith(arr); return result; }
         ).ToArray();
 
-        // pick random possible terrain
+        // pick a random eligible terrain
         int randomIndex = UnityEngine.Random.Range(0, eligibleTypes.Length);
         TerrainType terrain = eligibleTypes[randomIndex];
-
-        // @todo check if empty?:  
-        //TerrainType terrain = possibleTypes.Length > 0 ? eligibleTypes[randomIndex] : GetRandomTerrainType(true);
-
         return terrain;
     }
 
