@@ -201,7 +201,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 330585543}
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 300, y: 300, z: 150}
+  m_LocalPosition: {x: 100, y: 90, z: 50}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -397,6 +397,7 @@ MonoBehaviour:
   startX: 48
   startY: 48
   startType: 4
+  pickTypeStrategy: 1
   generateTerrain: 0
 --- !u!4 &494352411
 Transform:
@@ -461,4 +462,62 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &845323472
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 845323474}
+  - component: {fileID: 845323473}
+  m_Layer: 0
+  m_Name: TerrainGenerator (1)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!114 &845323473
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 845323472}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e799175c5daa14243bdc1574f5eaec11, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  terrainPrefab: {fileID: 2303278662871162874, guid: 43067b65f63105241baca05d86b63488,
+    type: 3}
+  treeMaterial: {fileID: 2100000, guid: 22b2440729025454186a5bd6effe0968, type: 2}
+  bushMaterial: {fileID: 2100000, guid: b74b32306bc174649a7802f85ce8b667, type: 2}
+  grassMaterial: {fileID: 2100000, guid: 8bfa43943609f144198b0a6cb20d4080, type: 2}
+  sandMaterial: {fileID: 2100000, guid: c1882628a49fe664d9d8aceb435997fe, type: 2}
+  waterMaterial: {fileID: 2100000, guid: ba705277caf713e4eab9a94cfdf39a6b, type: 2}
+  unknownMaterial: {fileID: 2100000, guid: 6dce886104305a74d9325eb922d53924, type: 2}
+  matrixSize: 99
+  startX: 48
+  startY: 48
+  startType: 4
+  pickTypeStrategy: 1
+  generateTerrain: 0
+--- !u!4 &845323474
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 845323472}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 103, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

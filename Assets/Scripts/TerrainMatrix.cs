@@ -12,6 +12,7 @@ public enum PickTypeStrategy
 public class TerrainMatrix
 {
     private Terrain[,] matrix;
+    public int startXxx = 1;
 
     public int matrixSize { get; private set; }
     public PickTypeStrategy pickTypeStrategy { get; private set; }
@@ -153,14 +154,15 @@ public class TerrainMatrix
 
         if (this.pickTypeStrategy == PickTypeStrategy.RandomWeighted)
         {
-            var adjacentTypesWeighted = adjacentTypes.GroupBy(type => type).Select(group => new { type = group.Key, weight = group.Count() });
-
+            // @todo play more with weightMod and random selection
+            float weightMod = .275f;
+            var adjacentTypesWeighted = adjacentTypes.GroupBy(type => type).Select(group => new { type = group.Key, weight = 1 - (group.Count() * weightMod) });
             var eligiblesWeighted = Array.ConvertAll(eligibleTypes, t =>
             {
                 // try to find eligible weighted type
                 var weightedType = adjacentTypesWeighted.FirstOrDefault(a => a.type == t);
                 // set default weight if unable to find
-                if (weightedType == null) { weightedType = new { type = t, weight = 1 }; }
+                if (weightedType == null) { weightedType = new { type = t, weight = 1f }; }
                 return weightedType;
             });
 
@@ -171,6 +173,7 @@ public class TerrainMatrix
                 .OrderBy(item => random.NextDouble() * item.weight)
                 .First();
 
+            //@ todo remove debug log
             // Debug.Log($"---------------------------------------eligibleTypes");
             // foreach (var t in eligibleTypes)
             // {
