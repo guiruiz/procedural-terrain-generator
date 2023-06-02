@@ -4,16 +4,24 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-
+public enum PickTypeStrategy
+{
+    Random,
+    RandomWeighted,
+}
 public class TerrainMatrix
 {
     private Terrain[,] matrix;
 
     public int matrixSize { get; private set; }
+    public PickTypeStrategy pickTypeStrategy { get; private set; }
 
-    public void Initialize(int matrixSize, int startX, int startY, TerrainType startType)
+
+    public void Initialize(int matrixSize, int startX, int startY, TerrainType startType, PickTypeStrategy pickTypeStrategy)
     {
         this.matrixSize = matrixSize;
+        this.pickTypeStrategy = pickTypeStrategy;
+
         Point startPoint = new Point(startX, startY);
 
         if (!IsInRange(startPoint))
@@ -46,7 +54,6 @@ public class TerrainMatrix
 
     void GenerateTerrains(Point startPoint)
     {
-        int foo = 0;
         for (int d = 1; d < matrixSize; d++)
         {
             int rightX = startPoint.x + d;
@@ -58,28 +65,24 @@ public class TerrainMatrix
             // nw -> ne
             for (int x = leftX; x <= rightX; x++)
             {
-                foo++;
                 CreateTerrain(new Point(x, upY));
             }
 
             // ne V se
             for (int y = upY - 1; y >= downY; y--)
             {
-                foo++;
                 CreateTerrain(new Point(rightX, y));
             }
 
             // sw <- se
             for (int x = rightX - 1; x >= leftX; x--)
             {
-                foo++;
                 CreateTerrain(new Point(x, downY));
             }
 
             // sw /\ ne
             for (int y = downY + 1; y <= upY; y++)
             {
-                foo++;
                 CreateTerrain(new Point(leftX, y));
             }
         }
@@ -122,9 +125,11 @@ public class TerrainMatrix
     {
         if (adjacents.Length == 0)
         {
-            Debug.LogWarning($"Adjacents terrain not found, picking a random type.");
+            Debug.LogWarning($"Adjacent terrains not found, picking a random type.");
             return GetRandomTerrainType();
         }
+
+        TerrainType[] adjacentTypes = Array.ConvertAll(adjacents, adj => adj.type);
 
         // get eligible terrain types for all adjacents
         TerrainType[][] allEligibleTypes = Array.ConvertAll(adjacents, adj => Terrain.GetEligibleTypes(adj.type));
@@ -137,10 +142,58 @@ public class TerrainMatrix
             (result, arr) => { result.IntersectWith(arr); return result; }
         ).ToArray();
 
-        // pick a random eligible terrain
-        int randomIndex = UnityEngine.Random.Range(0, eligibleTypes.Length);
-        TerrainType terrain = eligibleTypes[randomIndex];
-        return terrain;
+
+        if (this.pickTypeStrategy == PickTypeStrategy.Random)
+        {
+            // pick a random eligible terrain
+            int randomIndex = UnityEngine.Random.Range(0, eligibleTypes.Length);
+            TerrainType randomType = eligibleTypes[randomIndex];
+            return randomType;
+        }
+
+        if (this.pickTypeStrategy == PickTypeStrategy.RandomWeighted)
+        {
+            var adjacentTypesWeighted = adjacentTypes.GroupBy(type => type).Select(group => new { type = group.Key, weight = group.Count() });
+
+            var eligiblesWeighted = Array.ConvertAll(eligibleTypes, t =>
+            {
+                // try to find eligible weighted type
+                var weightedType = adjacentTypesWeighted.FirstOrDefault(a => a.type == t);
+                // set default weight if unable to find
+                if (weightedType == null) { weightedType = new { type = t, weight = 1 }; }
+                return weightedType;
+            });
+
+
+            // Get a random object using weight
+            var random = new System.Random();
+            var randomWeighted = eligiblesWeighted
+                .OrderBy(item => random.NextDouble() * item.weight)
+                .First();
+
+            // Debug.Log($"---------------------------------------eligibleTypes");
+            // foreach (var t in eligibleTypes)
+            // {
+            //     Debug.Log($"---- Type: {t}");
+            // }
+            // Debug.Log($"--------adjacentsWeighted");
+            // foreach (var group in adjacentsWeighted)
+            // {
+            //     Debug.Log($"---- Type: {group.type}, Weight: {group.weight}");
+            // }
+            // Debug.Log($"--------eligiblesWeighted");
+            // foreach (var group in eligiblesWeighted)
+            // {
+            //     Debug.Log($"---- Type: {group.type}, Weight: {group.weight}");
+            // }
+            // Debug.Log($"--------");
+            // Debug.Log($"Selected; {randomWeighted.type}");
+            // Debug.Log($"---------------------------------------");
+
+            return randomWeighted.type;
+        }
+
+        throw new Exception("PickTypeStrategy not set");
     }
 
     TerrainType GetRandomTerrainType()

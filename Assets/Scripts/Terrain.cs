@@ -1,5 +1,6 @@
 public enum TerrainType
 {
+    // @todo CamelCase
     TREE,
     BUSH,
     GRASS,
