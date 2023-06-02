@@ -53,6 +53,8 @@ public class TerrainGenerator : MonoBehaviour
 
     void SpawnTerrain(Terrain terrain)
     {
+        if (terrain == null) { return; }
+
         Vector3 position = new Vector3(terrain.x, 0f, terrain.y);
 
         GameObject terrainObject = Instantiate(terrainPrefab, position, Quaternion.identity);
