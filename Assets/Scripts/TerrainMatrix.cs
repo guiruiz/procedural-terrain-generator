@@ -46,6 +46,7 @@ public class TerrainMatrix
 
     void GenerateTerrains(Point startPoint)
     {
+        int foo = 0;
         for (int d = 1; d < matrixSize; d++)
         {
             int rightX = startPoint.x + d;
@@ -57,24 +58,28 @@ public class TerrainMatrix
             // nw -> ne
             for (int x = leftX; x <= rightX; x++)
             {
+                foo++;
                 CreateTerrain(new Point(x, upY));
             }
 
             // ne V se
-            for (int y = upY; y >= downY; y--)
+            for (int y = upY - 1; y >= downY; y--)
             {
+                foo++;
                 CreateTerrain(new Point(rightX, y));
             }
 
             // sw <- se
-            for (int x = rightX; x >= leftX; x--)
+            for (int x = rightX - 1; x >= leftX; x--)
             {
+                foo++;
                 CreateTerrain(new Point(x, downY));
             }
 
             // sw /\ ne
-            for (int y = downY; y <= upY; y++)
+            for (int y = downY + 1; y <= upY; y++)
             {
+                foo++;
                 CreateTerrain(new Point(leftX, y));
             }
         }

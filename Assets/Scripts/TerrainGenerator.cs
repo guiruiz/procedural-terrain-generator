@@ -12,11 +12,11 @@ public class TerrainGenerator : MonoBehaviour
     public int matrixSize = 3; // @todo odd only?
     public int startX = 1;
     public int startY = 1;
-
     public TerrainType startType = TerrainType.WATER;
-
     public bool generateTerrain = false;
 
+
+    private float terrainPrefabSize = 1f;
     void Start()
     {
         GenerateTerrains();
@@ -56,8 +56,7 @@ public class TerrainGenerator : MonoBehaviour
     void SpawnTerrain(Terrain terrain)
     {
         if (terrain == null) { return; }
-
-        Vector3 position = new Vector3(terrain.point.x, 0f, terrain.point.y);
+        Vector3 position = new Vector3(terrain.point.x * terrainPrefabSize, 0f, terrain.point.y * terrainPrefabSize);
 
         GameObject terrainObject = Instantiate(terrainPrefab, position, Quaternion.identity);
         terrainObject.transform.SetParent(transform);
