@@ -11,7 +11,7 @@ public class TerrainMatrix
 
     public int matrixSize { get; private set; }
 
-    public void Initialize(int matrixSize, int startX, int startY, TerrainType startType = TerrainType.WATER)
+    public void Initialize(int matrixSize, int startX, int startY, TerrainType startType)
     {
         this.matrixSize = matrixSize;
         Point startPoint = new Point(startX, startY);
@@ -22,9 +22,11 @@ public class TerrainMatrix
             return;
         }
 
+        // initialize matrix
         matrix = new Terrain[this.matrixSize, this.matrixSize];
-        Terrain startTerrain = new Terrain(startPoint, startType);
-        SetTerrain(startTerrain);
+
+        // Set initial terrain
+        SetTerrain(new Terrain(startPoint, startType));
 
         GenerateTerrains(startPoint);
     }
