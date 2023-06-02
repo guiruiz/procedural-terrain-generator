@@ -1,4 +1,3 @@
-
 public enum TerrainType
 {
     TREE,
@@ -10,18 +9,16 @@ public enum TerrainType
 
 public class Terrain
 {
-    public int x { get; private set; }
-    public int y { get; private set; }
+    public Point point;
     public TerrainType type { get; private set; }
 
-    public Terrain(int xPos, int yPos, TerrainType type)
+    public Terrain(Point point, TerrainType type)
     {
-        this.x = xPos;
-        this.y = yPos;
+        this.point = point;
         this.type = type;
     }
 
-    public static TerrainType[] GetPossibleTypes(TerrainType type)
+    public static TerrainType[] GetEligibleTypes(TerrainType type)
     {
         switch (type)
         {

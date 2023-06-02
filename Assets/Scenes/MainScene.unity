@@ -393,9 +393,10 @@ MonoBehaviour:
   sandMaterial: {fileID: 2100000, guid: c1882628a49fe664d9d8aceb435997fe, type: 2}
   waterMaterial: {fileID: 2100000, guid: ba705277caf713e4eab9a94cfdf39a6b, type: 2}
   unknownMaterial: {fileID: 2100000, guid: 6dce886104305a74d9325eb922d53924, type: 2}
-  matrixSize: 5
-  startX: 2
-  startY: 2
+  matrixSize: 101
+  startX: 50
+  startY: 50
+  startType: 4
   generateTerrain: 0
 --- !u!4 &494352411
 Transform:
@@ -405,7 +406,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 494352409}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.3332043, y: -0.21744621, z: 0.9508241}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

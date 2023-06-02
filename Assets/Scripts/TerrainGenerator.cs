@@ -13,6 +13,8 @@ public class TerrainGenerator : MonoBehaviour
     public int startX = 1;
     public int startY = 1;
 
+    public TerrainType startType = TerrainType.WATER;
+
     public bool generateTerrain = false;
 
     void Start()
@@ -35,17 +37,17 @@ public class TerrainGenerator : MonoBehaviour
     void GenerateTerrains()
     {
         TerrainMatrix matrix = new TerrainMatrix();
-        matrix.Initialize(matrixSize, startX, startY);
+        matrix.Initialize(matrixSize, startX, startY, startType);
 
         for (int x = 0; x < matrixSize; x++)
         {
             string rowLog = "";
             for (int y = 0; y < matrixSize; y++)
             {
-                Terrain terrain = matrix.GetTerrain(x, y);
+                Point point = new Point(x, y);
+                Terrain terrain = matrix.GetTerrain(point);
                 rowLog += (terrain != null) ? $" {terrain?.type} -" : " NULL -";
                 SpawnTerrain(terrain);
-
             }
             //Debug.Log($"Row {x} = {rowLog}");
         }
@@ -55,7 +57,7 @@ public class TerrainGenerator : MonoBehaviour
     {
         if (terrain == null) { return; }
 
-        Vector3 position = new Vector3(terrain.x, 0f, terrain.y);
+        Vector3 position = new Vector3(terrain.point.x, 0f, terrain.point.y);
 
         GameObject terrainObject = Instantiate(terrainPrefab, position, Quaternion.identity);
         terrainObject.transform.SetParent(transform);

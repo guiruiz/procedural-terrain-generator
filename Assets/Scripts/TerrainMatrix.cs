@@ -5,210 +5,151 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public struct Coords
-{
-    public int x, y;
-
-    public Coords(int x, int y)
-    {
-        this.x = x;
-        this.y = y;
-    }
-}
-
 public class TerrainMatrix
 {
-
     private Terrain[,] matrix;
 
-    public int size { get; private set; }
+    public int matrixSize { get; private set; }
 
     public void Initialize(int matrixSize, int startX, int startY, TerrainType startType = TerrainType.WATER)
     {
-        size = matrixSize;
+        this.matrixSize = matrixSize;
+        Point startPoint = new Point(startX, startY);
 
-        if (!isInRange(startX, startY))
+        if (!IsInRange(startPoint))
         {
             Debug.Log($"Invalid start coord: {startX}, {startY}");
             return;
         }
 
-        matrix = new Terrain[size, size];
-
-
-        Terrain startTerrain = new Terrain(startX, startY, startType);
+        matrix = new Terrain[this.matrixSize, this.matrixSize];
+        Terrain startTerrain = new Terrain(startPoint, startType);
         SetTerrain(startTerrain);
 
+        GenerateTerrains(startPoint);
+    }
+
+
+
+    public Terrain GetTerrain(Point point)
+    {
+        if (!IsInRange(point)) { return null; }
+
+        return matrix[point.x, point.y];
+    }
+
+    Terrain SetTerrain(Terrain terrain)
+    {
+        matrix[terrain.point.x, terrain.point.y] = terrain;
+        return terrain;
+    }
+
+    void GenerateTerrains(Point startPoint)
+    {
         for (int d = 1; d < matrixSize; d++)
         {
-            int rightX = startX + d;
-            int leftX = startX - d;
+            int rightX = startPoint.x + d;
+            int leftX = startPoint.x - d;
 
-            int upY = startY + d;
-            int downY = startY - d;
+            int upY = startPoint.y + d;
+            int downY = startPoint.y - d;
 
             // nw -> ne
             for (int x = leftX; x <= rightX; x++)
             {
-                CreateTerrain(x, upY);
+                CreateTerrain(new Point(x, upY));
             }
 
             // ne V se
             for (int y = upY; y >= downY; y--)
             {
-                CreateTerrain(rightX, y);
+                CreateTerrain(new Point(rightX, y));
             }
 
             // sw <- se
             for (int x = rightX; x >= leftX; x--)
             {
-                CreateTerrain(x, downY);
+                CreateTerrain(new Point(x, downY));
             }
 
             // sw /\ ne
             for (int y = downY; y <= upY; y++)
             {
-                CreateTerrain(leftX, y);
+                CreateTerrain(new Point(leftX, y));
             }
         }
     }
 
 
-    public Terrain GetTerrain(int x, int y)
+    void CreateTerrain(Point point)
     {
-        if (!isInRange(x, y))
-        {
-            //Debug.Log($"GetTerrain on invalid coord  {x}, {y}");
-            return null;
-        }
-
-
-        return matrix[x, y];
-
-    }
-
-    Terrain SetTerrain(Terrain terrain)
-    {
-        matrix[terrain.x, terrain.y] = terrain;
-        return terrain;
-    }
-
-    void CreateTerrain(int x, int y)
-    {
-        if (!isInRange(x, y) || GetTerrain(x, y) != null)
+        if (!IsInRange(point) || GetTerrain(point) != null)
         {
             return;
         }
 
-        int[][] adjacentCoords = GetAdjacentCoords(x, y);
-        Terrain[] validAdjacents = GetValidTerrains(adjacentCoords);
+        Point[] adjacentPoints = GetAdjacentPoints(point);
 
-        TerrainType terrainType = PickTerrainType(validAdjacents);
-        Terrain terrain = new Terrain(x, y, terrainType);
+
+        Terrain[] adjacentTerrains = adjacentPoints.Select(p => GetTerrain(p)).Where(p => p != null).ToArray();
+
+        TerrainType terrainType = this.PickTerrainType(adjacentTerrains);
+        Terrain terrain = new Terrain(point, terrainType);
         SetTerrain(terrain);
     }
 
-    Terrain[] GetValidTerrains(int[][] coords)
+    Point[] GetAdjacentPoints(Point point)
     {
-        List<Terrain> result = new List<Terrain>();
-        foreach (int[] c in coords)
-        {
-            if (!isInRange(c[0], c[1])) { continue; }
+        int d = 1;
+        Point n = new Point(point.x, point.y + d);
+        Point s = new Point(point.x, point.y - d);
+        Point e = new Point(point.x + d, point.y);
+        Point w = new Point(point.x - d, point.y);
+        Point ne = new Point(point.x + d, point.y + d);
+        Point nw = new Point(point.x - d, point.y + d);
+        Point se = new Point(point.x + d, point.y - d);
+        Point sw = new Point(point.x - d, point.y - d);
 
-            Terrain t = GetTerrain(c[0], c[1]);
-            if (t != null) { result.Add(t); }
-        }
-
-        return result.ToArray();
-    }
-
-    int[][] GetAdjacentCoords(int startX, int startY, int d = 1)
-    {
-        int[] n = { startX, startY + d };
-        int[] s = { startX, startY - d };
-        int[] e = { startX + d, startY };
-        int[] w = { startX - d, startY };
-        int[] ne = { startX + d, startY + d };
-        int[] nw = { startX - d, startY + d };
-        int[] se = { startX + d, startY - d };
-        int[] sw = { startX - d, startY - d };
-
-        int[][] ajds = { n, ne, e, se, s, sw, w, nw };
-        return ajds;
+        return new Point[] { n, ne, e, se, s, sw, w, nw }; ;
     }
 
     TerrainType PickTerrainType(Terrain[] adjacents)
     {
         if (adjacents.Length == 0)
         {
-            TerrainType initialType = GetRandomTerrainType();
-            Debug.Log($"Initial type: {initialType}");
-            return initialType;
+            Debug.Log($"WARN adj terrain not found;");
+            return GetRandomTerrainType();
         }
 
-        // get possible terrains types for each adj
-        TerrainType[][] allPossibleTypes = Array.ConvertAll(adjacents, adj => Terrain.GetPossibleTypes(adj.type));
+        // get all eligible terrains types for each adj
+        TerrainType[][] allEligibleTypes = Array.ConvertAll(adjacents, adj => Terrain.GetEligibleTypes(adj.type));
 
-        // find possible terrains intersection
-        IEnumerable<TerrainType> intersection = allPossibleTypes
+        // find eligible terrain types intersection
+        TerrainType[] eligibleTypes = allEligibleTypes
         .Skip(1) // Skip the first array
         .Aggregate(
-            new HashSet<TerrainType>(allPossibleTypes.First()),
+            new HashSet<TerrainType>(allEligibleTypes.First()),
             (result, arr) => { result.IntersectWith(arr); return result; }
-        );
+        ).ToArray();
 
-        // @todo check why possibleTypes is empty sometimes 
-        TerrainType[] possibleTypes = intersection.ToArray();
+        // pick random possible terrain
+        int randomIndex = UnityEngine.Random.Range(0, eligibleTypes.Length);
+        TerrainType terrain = eligibleTypes[randomIndex];
 
-        TerrainType pickedTerrain;
-        try
-        {
-            // pick random possible terrain
-            int randomIndex = UnityEngine.Random.Range(0, possibleTypes.Length);
-            pickedTerrain = possibleTypes[randomIndex];
-        }
-        catch (IndexOutOfRangeException e)
-        {
-            Debug.Log($"-----------------------------");
-            Debug.Log($"All possible");
-            foreach (TerrainType[] z in allPossibleTypes)
-            {
-                Debug.Log(string.Join(" ", z));
-            }
-            Debug.Log($"-----------------------------");
-            Debug.Log($"Intersection");
-            Debug.Log(string.Join(" ", intersection));
-            Debug.Log($"-----------------------------");
-            Debug.Log($"Possible");
-            Debug.Log(string.Join(" ", possibleTypes));
-            Debug.Log($"-----------------------------");
+        // @todo check if empty?:  
+        //TerrainType terrain = possibleTypes.Length > 0 ? eligibleTypes[randomIndex] : GetRandomTerrainType(true);
 
-            throw e;
-        }
-
-
-
-        //TerrainType pickedTerrain = possibleTypes.Length > 0 ? possibleTypes[randomIndex] : GetRandomTerrainType(true);
-
-        return pickedTerrain;
+        return terrain;
     }
 
-    TerrainType GetRandomTerrainType(bool log = false)
+    TerrainType GetRandomTerrainType()
     {
         TerrainType randomTerrainType = (TerrainType)UnityEngine.Random.Range(0, System.Enum.GetValues(typeof(TerrainType)).Length);
-
-        if (log)
-        {
-            Debug.Log($"Random terrain type: {log}");
-        }
-
         return randomTerrainType;
     }
 
-
-    bool isInRange(int x, int y)
+    bool IsInRange(Point p)
     {
-        return x >= 0 && y >= 0 && x < size && y < size;
+        return p.x >= 0 && p.y >= 0 && p.x < matrixSize && p.y < matrixSize;
     }
-
 }
